@@ -1,0 +1,2 @@
+export const isInWorker = () => typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+export const ensureInWorker = () => { if(!isInWorker()) throw new Error("Can only be imported inside web worker") }

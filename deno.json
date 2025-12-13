@@ -1,0 +1,23 @@
+{
+  "name": "@tangerie/workers",
+  "version": "0.0.1",
+  "license": "MIT",
+  "publish": {
+    "include": [
+      "README.md",
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "examples"
+    ]
+  },
+  "exports":  "./src/mod.ts",
+  "imports": {
+  },
+  "tasks": {
+    "example": "deno run -A"
+  },
+  "compilerOptions": {
+    "lib": ["deno.worker"]
+  }
+}
