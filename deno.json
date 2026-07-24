@@ -1,23 +1,39 @@
 {
-  "name": "@tangerie/workers",
-  "version": "0.0.1",
-  "license": "MIT",
-  "publish": {
-    "include": [
-      "README.md",
-      "src/**/*.ts"
-    ],
-    "exclude": [
-      "examples"
-    ]
-  },
-  "exports":  "./src/mod.ts",
-  "imports": {
-  },
-  "tasks": {
-    "example": "deno run -A"
-  },
-  "compilerOptions": {
-    "lib": ["deno.worker"]
-  }
+    "name": "@tangerie/workers",
+    "version": "0.1.0",
+    "license": "MIT",
+    "exports": {
+        ".": "./mod.ts",
+        "./register": "./register.ts",
+        "./runtime": "./runtime/mod.ts"
+    },
+    "publish": {
+        "include": [
+            "README.md",
+            "mod.ts",
+            "register.ts",
+            "core/**/*.ts",
+            "hooks/**/*.ts",
+            "runtime/**/*.ts"
+        ]
+    },
+    "imports": {
+        "@std/assert": "jsr:@std/assert@^1",
+        "@tangerie/utils": "jsr:@tangerie/utils@^2.7.1",
+        "@tangerie/workers": "./mod.ts",
+        "@tangerie/workers/register": "./register.ts",
+        "@tangerie/workers/runtime": "./runtime/mod.ts"
+    },
+    "tasks": {
+        "check": "deno check .",
+        "test": "deno test -A tests/",
+        "example": "deno run -A --import jsr:@tangerie/workers/register examples/main.ts"
+    },
+    "compilerOptions": {
+        "lib": ["deno.worker"]
+    },
+    "fmt": {
+        "indentWidth": 4,
+        "lineWidth": 100
+    }
 }
