@@ -16,12 +16,14 @@ Deno.test("interleaved concurrent calls resolve to the right ids", async () => {
     const p = createWorkerProxy(FIXTURE);
     const add = p.bind("add");
     const slow = p.bind("slow");
+
     const [s1, a1, s2, a2] = await Promise.all([
         slow("first", 100),
         add(10, 20),
         slow("second", 20),
-        add(3, 4),
+        add(3, 4)
     ]);
+
     assertEquals([s1, a1, s2, a2], ["slow:first", 30, "slow:second", 7]);
     await p.close();
 });

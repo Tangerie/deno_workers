@@ -1,6 +1,3 @@
-// Run with the hooks preloaded:
-//   deno task example
-//   (equivalent to: deno run -A --import ./register.ts examples/main.ts)
 import { add, boom, slow } from "./math.worker.ts";
 import { closeWorker } from "@tangerie/workers";
 
@@ -9,7 +6,7 @@ console.log(await slow("hello"));
 
 try {
     await boom();
-} catch (err) {
+} catch(err) {
     console.log("boom() rejected:", (err as Error).message.split("\n")[0]);
 }
 

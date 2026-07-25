@@ -14,12 +14,24 @@ transparently get Worker-backed RPC proxies for its exports, implemented with De
 - `deno task check` — type-check everything, including the compile-time assertions in
   `tests/types_test.ts` (`Equal<>`, `@ts-expect-error`).
 - `deno task test` — full test suite (`deno test -A tests/`); spawns real workers, no network needed
-  once deps are cached. Single file: `deno test -A tests/proxy_test.ts`.
-- `deno task example` — runs `examples/main.ts` with hooks preloaded via `--import ./register.ts`.
-- `deno publish --dry-run --allow-dirty` — verify JSR publish (no-slow-types etc.). The
-  `unanalyzable-dynamic-import` warning for `runtime/worker_entry.ts` is expected and harmless (it
-  imports an absolute `file:` URL at runtime).
-- `deno fmt` / `deno lint` — fmt config is 4-space indent, 100 line width.
+  once deps are cached. Single file: `deno test -A tests/proxy_test.ts`. Single case:
+  `deno test -A tests/ --filter "graceful close"`.
+- `deno task example` — runs `examples/main.ts` end-to-end through the real hooks. The task preloads
+  `jsr:@tangerie/workers/register`, but because `deno.json` `name` is `@tangerie/workers` that
+  self-resolves to the local `register.ts` — it does exercise local hook changes.
+- `deno task dry` — `deno publish --dry-run --allow-dirty`; verifies JSR publish (no-slow-types
+  etc.). The `unanalyzable-dynamic-import` warning for `runtime/worker_entry.ts` is expected and
+  harmless (it imports an absolute `file:` URL at runtime).
+
+## Style
+
+Source is hand-formatted, not `deno fmt`-formatted: 4-space indent, `if(` with no space, spaced type
+colons (`url : string`, `) : LoadResult`), double quotes, no trailing commas. There is deliberately
+no `fmt` block in `deno.json` — **do not run `deno fmt`**, it reverts all of the above.
+
+`deno lint` reports 3 known problems that should be left alone: two `no-explicit-any` (the deliberate
+`as any` on the `node:module` import in `register.ts` and `tests/integration_test.ts`) and one
+`verbatim-module-syntax` in `tests/types_test.ts`.
 
 ## Architecture
 
@@ -63,3 +75,7 @@ Three layers; data flows: consumer import → loader hooks → generated proxy m
   URLs to `createWorkerProxy` directly.
 - JSR no-slow-types: every public symbol needs explicit types (that's why `WorkerEmitter` exists in
   `core/core.ts`).
+- `.github/workflows/publish.yml` runs `npx jsr publish` on **every push to `main`** — bump `version`
+  in `deno.json` alongside any functional change, or the publish step fails on a duplicate version.
+- `deno.json` `publish.include` is an allowlist: a new top-level source directory ships nothing until
+  it is added there. `tests/` and `examples/` are intentionally excluded.

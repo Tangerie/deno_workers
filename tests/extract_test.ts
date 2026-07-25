@@ -1,7 +1,7 @@
 import { assert, assertEquals, assertThrows } from "@std/assert";
 import { extractExportedNames, stripLiterals } from "../hooks/extract.ts";
 
-const names = (src: string) => extractExportedNames(src).names.sort();
+const names = (src : string) => extractExportedNames(src).names.sort();
 
 Deno.test("declaration exports", () => {
     assertEquals(
@@ -15,7 +15,7 @@ Deno.test("declaration exports", () => {
             export class Thing {}
             export enum Mode { A, B }
         `),
-        ["Mode", "Thing", "add", "answer", "counter", "gen", "legacy", "slow"],
+        ["Mode", "Thing", "add", "answer", "counter", "gen", "legacy", "slow"]
     );
 });
 
@@ -45,7 +45,7 @@ Deno.test("exports inside comments/strings/templates are ignored", () => {
             const t = \`export const inTemplate = \${"export const inInterp = 1"}\`;
             export function real() {}
         `),
-        ["real"],
+        ["real"]
     );
 });
 
@@ -57,10 +57,6 @@ Deno.test("template interpolation does not derail the lexer", () => {
 
 Deno.test("unsupported forms throw loudly", () => {
     assertThrows(() => extractExportedNames(`export * from "./other.ts";`), Error, "export *");
-    assertThrows(
-        () => extractExportedNames(`export const { a, b } = obj;`),
-        Error,
-        "destructuring",
-    );
+    assertThrows(() => extractExportedNames(`export const { a, b } = obj;`), Error, "destructuring");
     assertThrows(() => extractExportedNames(`export const [x] = arr;`), Error, "destructuring");
 });

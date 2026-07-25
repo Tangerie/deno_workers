@@ -5,9 +5,7 @@ import { load, resolve } from "../hooks/mod.ts";
 import { closeWorker, getWorker } from "../runtime/proxy.ts";
 import { workerized } from "../runtime/types.ts";
 
-const mod = await import("node:module") as unknown as {
-    registerHooks: (hooks: { resolve: typeof resolve; load: typeof load }) => unknown;
-};
+const mod = await import("node:module") as any;
 mod.registerHooks({ resolve, load });
 
 const FIXTURE = import.meta.resolve("./fixtures/math.worker.ts");
@@ -16,8 +14,10 @@ Deno.test("importing a *.worker.ts yields RPC proxies", async () => {
     const worker = workerized(await import("./fixtures/math.worker.ts"));
     assertEquals(await worker.add(1, 2), 3);
     assertEquals(await worker.slow("hi", 10), "slow:hi");
+
     const err = await assertRejects(() => worker.boom("bang"), Error);
     assertStringIncludes(err.message, "bang");
+
     assert(getWorker(FIXTURE), "proxy should be registered under the fixture URL");
     await closeWorker(FIXTURE);
 });
