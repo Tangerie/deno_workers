@@ -1,5 +1,7 @@
 // Compile-time assertions — exercised by `deno task check`.
+import { workerized } from "../runtime/types.ts";
 import type { Workerized } from "../runtime/types.ts";
+import type * as fixture from "./fixtures/math.worker.ts";
 
 type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true
     : false;
@@ -18,6 +20,12 @@ assertType<Equal<Remote["slow"], (x: string) => Promise<string>>>();
 
 // Non-function exports are stripped.
 assertType<Equal<keyof Remote, "add" | "slow">>();
+
+// workerized() re-types a module namespace as its proxy shape.
+assertType<Equal<ReturnType<typeof workerized<typeof fixture>>, Workerized<typeof fixture>>>();
+assertType<
+    Equal<Workerized<typeof fixture>["add"], (a: number, b: number) => Promise<number>>
+>();
 
 // Wrong argument types are rejected through Workerized (never executed).
 const compileOnly = (remote: Remote) => {

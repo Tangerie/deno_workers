@@ -3,7 +3,7 @@
 import { assert, assertEquals, assertRejects, assertStringIncludes } from "@std/assert";
 import { load, resolve } from "../hooks/mod.ts";
 import { closeWorker, getWorker } from "../runtime/proxy.ts";
-import type { Workerized } from "../runtime/types.ts";
+import { workerized } from "../runtime/types.ts";
 
 const mod = await import("node:module") as unknown as {
     registerHooks: (hooks: { resolve: typeof resolve; load: typeof load }) => unknown;
@@ -13,9 +13,7 @@ mod.registerHooks({ resolve, load });
 const FIXTURE = import.meta.resolve("./fixtures/math.worker.ts");
 
 Deno.test("importing a *.worker.ts yields RPC proxies", async () => {
-    const worker = await import("./fixtures/math.worker.ts") as unknown as Workerized<
-        typeof import("./fixtures/math.worker.ts")
-    >;
+    const worker = workerized(await import("./fixtures/math.worker.ts"));
     assertEquals(await worker.add(1, 2), 3);
     assertEquals(await worker.slow("hi", 10), "slow:hi");
     const err = await assertRejects(() => worker.boom("bang"), Error);

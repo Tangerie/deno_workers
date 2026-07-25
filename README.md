@@ -58,10 +58,20 @@ deno run -A --import @tangerie/workers/register main.ts
 - `getWorker(url)` — the underlying `WorkerProxy` handle (`AsyncDisposable`, so `await using`
   works).
 - `closeAllWorkers({ force? })` — terminate everything.
-- `Workerized<M>` — maps a module type to what the proxy really returns (functions become
-  Promise-returning, non-function exports stripped). Mostly for tests/docs — in practice just
-  `await` every call: TS allows awaiting non-promises, so sync-typed worker functions type-check
-  too. Prefer writing worker functions `async` for exact types.
+- `workerized(mod)` / `Workerized<M>` — the type-checker sees the _original_ module (loader hooks
+  don't run in the LSP), so sync worker functions look sync-typed. `await` works regardless (TS
+  allows awaiting non-promises), but for honest IntelliSense re-type the namespace — identity at
+  runtime:
+
+  ```ts
+  import * as mathWorker from "./math.worker.ts";
+  import { workerized } from "@tangerie/workers";
+
+  const math = workerized(mathWorker);
+  await math.add(1, 2); // typed Promise<number>; non-function exports are stripped
+  ```
+
+  Alternatively, write worker functions `async` and the original types are already exact.
 - `createWorkerEmitter<In, Out>(url?)` — the low-level typed message emitter both sides are built
   on, exported for manual worker wiring.
 
